@@ -1,0 +1,211 @@
+.markdown-pdf {
+	font-family: var(--markdown-pdf-font-family, 'Avenir Next', 'Segoe UI', sans-serif);
+	font-size: var(--markdown-pdf-font-size, 16px);
+	line-height: 1.55;
+	color: var(--markdown-pdf-text-color, #1e293b);
+}
+
+.markdown-pdf > :first-child {
+	margin-top: 0;
+}
+
+.markdown-pdf > :last-child {
+	margin-bottom: 0;
+}
+
+.markdown-pdf h1,
+.markdown-pdf h2,
+.markdown-pdf h3,
+.markdown-pdf h4,
+.markdown-pdf h5,
+.markdown-pdf h6 {
+	margin: 1rem 0 0.5rem;
+	line-height: 1.2;
+	color: var(--markdown-pdf-heading-color, #0f172a);
+}
+
+.markdown-pdf h1 {
+	font-size: 2rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	margin-top: 1.4rem;
+	padding-bottom: 0.3rem;
+	border-bottom: 1px solid var(--markdown-pdf-divider-color, #d9e0e2);
+}
+
+.markdown-pdf h2 {
+	font-size: 1.55rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	margin-top: 1.25rem;
+	padding-bottom: 0.2rem;
+	border-bottom: 1px solid var(--markdown-pdf-divider-color, #d9e0e2);
+}
+
+.markdown-pdf h3 {
+	font-size: 1.3rem;
+	font-weight: 650;
+}
+
+.markdown-pdf h4 {
+	font-size: 1.1rem;
+	font-weight: 650;
+}
+
+.markdown-pdf h5 {
+	font-size: 0.98rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--markdown-pdf-muted-color, #334155);
+}
+
+.markdown-pdf h6 {
+	font-size: 0.9rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	color: var(--markdown-pdf-subtle-color, #475569);
+}
+
+.markdown-pdf p,
+.markdown-pdf ul,
+.markdown-pdf ol,
+.markdown-pdf pre,
+.markdown-pdf blockquote {
+	margin: 0.6rem 0;
+}
+
+.markdown-pdf ul,
+.markdown-pdf ol {
+	padding-left: 1.75rem;
+}
+
+.markdown-pdf ul ul,
+.markdown-pdf ol ol,
+.markdown-pdf ul ol,
+.markdown-pdf ol ul {
+	margin-top: 0.35rem;
+	margin-bottom: 0.35rem;
+}
+
+.markdown-pdf ul {
+	list-style-type: disc;
+}
+
+.markdown-pdf ul ul {
+	list-style-type: circle;
+}
+
+.markdown-pdf ul ul ul {
+	list-style-type: square;
+}
+
+.markdown-pdf ol {
+	list-style-type: decimal;
+}
+
+.markdown-pdf li {
+	margin: 0.3rem 0;
+	padding-left: 0.15rem;
+}
+
+.markdown-pdf li::marker {
+	color: var(--markdown-pdf-muted-color, #334155);
+	font-weight: 600;
+}
+
+.markdown-pdf hr {
+	margin: 1.25rem 0;
+	border: 0;
+	border-top: 1px solid var(--markdown-pdf-divider-color, #d9e0e2);
+}
+
+.markdown-pdf blockquote {
+	padding: 0.55rem 0.9rem;
+	border-left: 3px solid var(--markdown-pdf-quote-border-color, #94a3b8);
+	border-radius: 0.45rem;
+	background: var(--markdown-pdf-quote-background, #f1f5f9);
+	color: var(--markdown-pdf-text-color, #1e293b);
+	font-style: italic;
+}
+
+.markdown-pdf blockquote p {
+	margin: 0.35rem 0;
+}
+
+.markdown-pdf a {
+	color: var(--markdown-pdf-link-color, #1d4ed8);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	text-decoration-thickness: 1px;
+	word-break: break-word;
+}
+
+.markdown-pdf input[type='checkbox'] {
+	width: 0.95rem;
+	height: 0.95rem;
+	margin-right: 0.45rem;
+	vertical-align: -0.1rem;
+	accent-color: var(--markdown-pdf-accent-color, #0f766e);
+}
+
+.markdown-pdf li:has(input[type='checkbox']) {
+	list-style: none;
+	margin-left: -0.2rem;
+	padding-left: 0;
+}
+
+.markdown-pdf li:has(input[type='checkbox'])::marker {
+	content: '';
+}
+
+.markdown-pdf table {
+	border-collapse: collapse;
+	margin: 0.8rem 0;
+	font-size: 0.95rem;
+}
+
+.markdown-pdf th,
+.markdown-pdf td {
+	border: 1px solid var(--markdown-pdf-divider-color, #d9e0e2);
+	padding: 0.4rem 0.65rem;
+	text-align: left;
+}
+
+.markdown-pdf th {
+	background: var(--markdown-pdf-table-heading-background, #f1f5f9);
+	font-weight: 600;
+	color: var(--markdown-pdf-heading-color, #0f172a);
+}
+
+.markdown-pdf tbody tr:nth-child(even) {
+	background: var(--markdown-pdf-table-row-background, #f8fafc);
+}
+
+.markdown-pdf code {
+	font-family:
+		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+	font-size: 0.9em;
+	padding: 0.1em 0.35em;
+	border-radius: 0.35rem;
+	background: var(--markdown-pdf-code-background, #e7ecec);
+}
+
+.markdown-pdf pre {
+	padding: 0.8rem;
+	border-radius: 0.75rem;
+	background: var(--markdown-pdf-code-block-background, #ecf1f3);
+	overflow-x: auto;
+}
+
+.markdown-pdf pre code {
+	padding: 0;
+	background: transparent;
+}
+
+.markdown-pdf img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 0.9rem 0;
+}

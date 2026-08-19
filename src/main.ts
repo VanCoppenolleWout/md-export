@@ -69,7 +69,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
     <section class="grid content-start gap-2 rounded-2xl border border-stone-300 bg-white/75 p-4 sm:p-5" aria-labelledby="preview-title">
       <h2 id="preview-title" class="m-0 text-sm font-semibold uppercase tracking-[0.08em] text-slate-500">Preview</h2>
-      <article id="preview-content" class="markdown-preview max-h-[70svh] overflow-auto pr-1 text-slate-800"></article>
+	<article id="preview-content" class="markdown-pdf max-h-[70svh] overflow-auto pr-1"></article>
     </section>
   </section>
 </main>

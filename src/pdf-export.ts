@@ -3,6 +3,7 @@ import {jsPDF} from 'jspdf'
 import DOMPurify from 'dompurify'
 import {marked} from 'marked'
 import {renderPdfFromTextBlocks} from './pdf-text-fallback'
+import './markdown-pdf.css'
 
 type ExportPdfOptions = {
 	fileName: string
@@ -25,7 +26,7 @@ function createExportElement(markdownSource: string): HTMLElement {
 	const parsed = marked.parse(markdownSource)
 	const html = typeof parsed === 'string' ? parsed : ''
 	const exportElement = document.createElement('article')
-	exportElement.className = 'markdown-preview'
+	exportElement.className = 'markdown-pdf'
 	exportElement.innerHTML = DOMPurify.sanitize(html, {
 		USE_PROFILES: {html: true}
 	})
@@ -208,11 +209,8 @@ function createRenderContainer(exportElement: HTMLElement): HTMLElement {
 	// Keeps descenders of the last text line off the canvas edge.
 	container.style.paddingBottom = '8px'
 
-	// Tailwind v4 utilities resolve to oklch() colors, which html2canvas cannot
-	// parse — keep only the stylesheet class (hex colors) and inline the text
-	// color the export element gets from text-slate-800.
+	// The portable stylesheet uses hex fallbacks, which html2canvas can parse.
 	const clone = exportElement.cloneNode(true) as HTMLElement
-	clone.className = 'markdown-preview'
 	clone.style.color = '#1e293b'
 	clone.style.maxHeight = 'none'
 	clone.style.overflow = 'visible'
