@@ -1,60 +1,214 @@
 import './style.css'
+import DOMPurify from 'dompurify'
+import {marked} from 'marked'
+
+const starterMarkdown = `# Preview Ready
+
+Drop or upload a markdown file to preview it here.
+
+## Included
+
+- Headings
+- Lists
+- **Bold** and _italic_
+
+\`\`\`ts
+const message = 'Hello markdown preview'
+console.log(message)
+\`\`\`
+`
+
+marked.setOptions({
+	gfm: true,
+	breaks: false
+})
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <main class="grid min-h-svh place-items-center px-4 py-8 sm:px-6">
   <section
-    class="grid w-full max-w-3xl gap-4 rounded-3xl border border-stone-300/90 bg-white/80 p-5 shadow-[0_12px_32px_rgba(37,39,46,0.09),0_2px_8px_rgba(37,39,46,0.05)] backdrop-blur-md sm:p-8"
+    class="grid w-full max-w-6xl gap-5 rounded-3xl border border-stone-300/90 bg-white/80 p-5 shadow-[0_12px_32px_rgba(37,39,46,0.09),0_2px_8px_rgba(37,39,46,0.05)] backdrop-blur-md sm:p-8 lg:grid-cols-2"
     aria-labelledby="mvp-title"
   >
-    <p class="m-0 text-xs font-bold uppercase tracking-[0.09em] text-slate-500">Markdown to PDF</p>
-    <h1 id="mvp-title" class="m-0 text-3xl font-semibold leading-[1.05] tracking-[-0.02em] text-slate-900 sm:text-4xl">
-      Drop one .md file and export a clean PDF.
-    </h1>
-    <p class="m-0 max-w-2xl text-[0.96rem] text-slate-600">
-      MVP step 1: minimal UI with upload, drag-and-drop surface, and print/download actions.
-    </p>
+    <div class="grid content-start gap-4">
+      <p class="m-0 text-xs font-bold uppercase tracking-[0.09em] text-slate-500">Markdown to PDF</p>
+      <h1 id="mvp-title" class="m-0 text-3xl font-semibold leading-[1.05] tracking-[-0.02em] text-slate-900 sm:text-4xl">
+        Drop one .md file and export a clean PDF.
+      </h1>
+      <p class="m-0 max-w-2xl text-[0.96rem] text-slate-600">
+        MVP step 1: minimal UI with upload, drag-and-drop surface, and print/download actions.
+      </p>
 
-    <div class="flex flex-wrap items-center gap-3 max-sm:flex-col max-sm:items-stretch" role="group" aria-label="File selection">
-      <label
-        for="markdown-file"
-        class="cursor-pointer rounded-full border border-transparent bg-teal-700 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(15,118,110,0.75)] transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+      <div class="flex flex-wrap items-center gap-3 max-sm:flex-col max-sm:items-stretch" role="group" aria-label="File selection">
+        <label
+          for="markdown-file"
+          class="cursor-pointer rounded-full border border-transparent bg-teal-700 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(15,118,110,0.75)] transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+        >
+          Choose .md File
+        </label>
+        <input id="markdown-file" class="sr-only" type="file" accept=".md,text/markdown" />
+        <p id="selected-file" class="m-0 text-sm text-slate-500">No file selected</p>
+      </div>
+
+      <div
+        id="dropzone"
+        class="rounded-2xl border-2 border-dashed border-stone-300 bg-white/60 px-4 py-6 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+        role="button"
+        tabindex="0"
+        aria-label="Drop markdown file"
+        aria-describedby="dropzone-hint"
       >
-        Choose .md File
-      </label>
-      <input id="markdown-file" class="sr-only" type="file" accept=".md,text/markdown" />
-      <p id="selected-file" class="m-0 text-sm text-slate-500">No file selected</p>
+        <p class="m-0 text-base font-semibold text-slate-900">Drop your markdown file here</p>
+        <p id="dropzone-hint" class="mt-1 m-0 text-sm text-slate-500">Only .md files are accepted</p>
+      </div>
+
+      <p id="mvp-status" class="m-0 text-sm text-slate-600" role="status" aria-live="polite"></p>
+
+      <div class="flex flex-wrap items-center gap-3 max-sm:flex-col max-sm:items-stretch" role="group" aria-label="PDF actions">
+        <button
+          id="download-pdf"
+          type="button"
+          class="rounded-full border border-transparent bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(15,118,110,0.75)] transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+        >
+          Download PDF
+        </button>
+        <button
+          id="print-pdf"
+          type="button"
+          class="rounded-full border border-stone-300 bg-white/85 px-4 py-2.5 text-sm font-semibold text-slate-900 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+        >
+          Print PDF
+        </button>
+      </div>
     </div>
 
-    <div
-      id="dropzone"
-      class="rounded-2xl border-2 border-dashed border-stone-300 bg-white/60 px-4 py-6 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
-      role="button"
-      tabindex="0"
-      aria-label="Drop markdown file"
-      aria-describedby="dropzone-hint"
-    >
-      <p class="m-0 text-base font-semibold text-slate-900">Drop your markdown file here</p>
-      <p id="dropzone-hint" class="mt-1 m-0 text-sm text-slate-500">Only .md files are accepted</p>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-3 max-sm:flex-col max-sm:items-stretch" role="group" aria-label="PDF actions">
-      <button
-        id="download-pdf"
-        type="button"
-        class="rounded-full border border-transparent bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_-10px_rgba(15,118,110,0.75)] transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
-      >
-        Download PDF
-      </button>
-      <button
-        id="print-pdf"
-        type="button"
-        class="rounded-full border border-stone-300 bg-white/85 px-4 py-2.5 text-sm font-semibold text-slate-900 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
-      >
-        Print PDF
-      </button>
-    </div>
-
-    <p class="m-0 text-xs text-slate-500">PDF logic is added in the next step.</p>
+    <section class="grid content-start gap-2 rounded-2xl border border-stone-300 bg-white/75 p-4 sm:p-5" aria-labelledby="preview-title">
+      <h2 id="preview-title" class="m-0 text-sm font-semibold uppercase tracking-[0.08em] text-slate-500">Preview</h2>
+      <article id="preview-content" class="markdown-preview max-h-[70svh] overflow-auto pr-1 text-slate-800"></article>
+    </section>
   </section>
 </main>
 `
+
+const fileInput = document.querySelector<HTMLInputElement>('#markdown-file')!
+const selectedFile = document.querySelector<HTMLParagraphElement>('#selected-file')!
+const dropzone = document.querySelector<HTMLDivElement>('#dropzone')!
+const statusElement = document.querySelector<HTMLParagraphElement>('#mvp-status')!
+const previewContent = document.querySelector<HTMLElement>('#preview-content')!
+const downloadButton = document.querySelector<HTMLButtonElement>('#download-pdf')!
+const printButton = document.querySelector<HTMLButtonElement>('#print-pdf')!
+
+const dropzoneActiveClasses = ['border-teal-500', 'bg-teal-50/80']
+
+function setStatus(message: string, tone: 'neutral' | 'success' | 'error' = 'neutral') {
+	statusElement.textContent = message
+	statusElement.classList.remove('text-slate-600', 'text-teal-700', 'text-rose-700')
+
+	if (tone === 'success') {
+		statusElement.classList.add('text-teal-700')
+		return
+	}
+
+	if (tone === 'error') {
+		statusElement.classList.add('text-rose-700')
+		return
+	}
+
+	statusElement.classList.add('text-slate-600')
+}
+
+function isMarkdownFile(file: File): boolean {
+	return file.name.toLowerCase().endsWith('.md') || file.type === 'text/markdown'
+}
+
+function renderMarkdownPreview(markdownSource: string) {
+	const parsed = marked.parse(markdownSource)
+	const html = typeof parsed === 'string' ? parsed : ''
+	previewContent.innerHTML = DOMPurify.sanitize(html, {
+		USE_PROFILES: {html: true}
+	})
+}
+
+async function handleMarkdownFile(file: File) {
+	if (!isMarkdownFile(file)) {
+		setStatus('Only .md files are accepted.', 'error')
+		return
+	}
+
+	try {
+		const markdownSource = await file.text()
+		renderMarkdownPreview(markdownSource)
+		selectedFile.textContent = file.name
+		setStatus(`Loaded ${file.name}`, 'success')
+	} catch {
+		setStatus('Could not read file. Try another markdown file.', 'error')
+	}
+}
+
+function activateDropzone() {
+	dropzone.classList.add(...dropzoneActiveClasses)
+}
+
+function deactivateDropzone() {
+	dropzone.classList.remove(...dropzoneActiveClasses)
+}
+
+renderMarkdownPreview(starterMarkdown)
+setStatus('Preview is active. Upload or drop a markdown file.', 'neutral')
+
+fileInput.addEventListener('change', async () => {
+	const file = fileInput.files?.[0]
+	if (!file) {
+		return
+	}
+
+	await handleMarkdownFile(file)
+})
+
+dropzone.addEventListener('click', () => {
+	fileInput.click()
+})
+
+dropzone.addEventListener('keydown', (event) => {
+	if (event.key === 'Enter' || event.key === ' ') {
+		event.preventDefault()
+		fileInput.click()
+	}
+})
+
+dropzone.addEventListener('dragenter', (event) => {
+	event.preventDefault()
+	activateDropzone()
+})
+
+dropzone.addEventListener('dragover', (event) => {
+	event.preventDefault()
+	activateDropzone()
+})
+
+dropzone.addEventListener('dragleave', (event) => {
+	event.preventDefault()
+
+	if (!dropzone.contains(event.relatedTarget as Node | null)) {
+		deactivateDropzone()
+	}
+})
+
+dropzone.addEventListener('drop', async (event) => {
+	event.preventDefault()
+	deactivateDropzone()
+
+	const file = event.dataTransfer?.files?.[0]
+	if (!file) {
+		return
+	}
+
+	await handleMarkdownFile(file)
+})
+
+downloadButton.addEventListener('click', () => {
+	setStatus('PDF download follows in the next step.', 'neutral')
+})
+
+printButton.addEventListener('click', () => {
+	setStatus('PDF print flow follows in the next step.', 'neutral')
+})

@@ -16,6 +16,8 @@
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.3.3",
+		"dompurify": "^3.4.13",
+		"marked": "^18.0.10",
 		"tailwindcss": "^4.3.3"
 	}
 }
