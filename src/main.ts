@@ -1,6 +1,7 @@
 import './style.css'
 import DOMPurify from 'dompurify'
 import {marked} from 'marked'
+import {setupMarkdownFilePicker} from './markdown-file-picker'
 
 const starterMarkdown = `# Preview Ready
 
@@ -116,10 +117,6 @@ function setStatus(message: string, tone: 'neutral' | 'success' | 'error' = 'neu
 	statusElement.classList.add('text-slate-600')
 }
 
-function isMarkdownFile(file: File): boolean {
-	return file.name.toLowerCase().endsWith('.md') || file.type === 'text/markdown'
-}
-
 function renderMarkdownPreview(markdownSource: string) {
 	const parsed = marked.parse(markdownSource)
 	const html = typeof parsed === 'string' ? parsed : ''
@@ -129,19 +126,10 @@ function renderMarkdownPreview(markdownSource: string) {
 }
 
 async function handleMarkdownFile(file: File) {
-	if (!isMarkdownFile(file)) {
-		setStatus('Only .md files are accepted.', 'error')
-		return
-	}
-
-	try {
-		const markdownSource = await file.text()
-		renderMarkdownPreview(markdownSource)
-		selectedFile.textContent = file.name
-		setStatus(`Loaded ${file.name}`, 'success')
-	} catch {
-		setStatus('Could not read file. Try another markdown file.', 'error')
-	}
+	const markdownSource = await file.text()
+	renderMarkdownPreview(markdownSource)
+	selectedFile.textContent = file.name
+	setStatus(`Loaded ${file.name}`, 'success')
 }
 
 function activateDropzone() {
@@ -155,54 +143,24 @@ function deactivateDropzone() {
 renderMarkdownPreview(starterMarkdown)
 setStatus('Preview is active. Upload or drop a markdown file.', 'neutral')
 
-fileInput.addEventListener('change', async () => {
-	const file = fileInput.files?.[0]
-	if (!file) {
-		return
-	}
+setupMarkdownFilePicker({
+	fileInput,
+	dropzone,
+	onFileSelected: handleMarkdownFile,
+	onInvalidFile: () => {
+		setStatus('Only .md files are accepted.', 'error')
+	},
+	onReadError: () => {
+		setStatus('Could not read file. Try another markdown file.', 'error')
+	},
+	onDragStateChange: (isActive) => {
+		if (isActive) {
+			activateDropzone()
+			return
+		}
 
-	await handleMarkdownFile(file)
-})
-
-dropzone.addEventListener('click', () => {
-	fileInput.click()
-})
-
-dropzone.addEventListener('keydown', (event) => {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault()
-		fileInput.click()
-	}
-})
-
-dropzone.addEventListener('dragenter', (event) => {
-	event.preventDefault()
-	activateDropzone()
-})
-
-dropzone.addEventListener('dragover', (event) => {
-	event.preventDefault()
-	activateDropzone()
-})
-
-dropzone.addEventListener('dragleave', (event) => {
-	event.preventDefault()
-
-	if (!dropzone.contains(event.relatedTarget as Node | null)) {
 		deactivateDropzone()
 	}
-})
-
-dropzone.addEventListener('drop', async (event) => {
-	event.preventDefault()
-	deactivateDropzone()
-
-	const file = event.dataTransfer?.files?.[0]
-	if (!file) {
-		return
-	}
-
-	await handleMarkdownFile(file)
 })
 
 downloadButton.addEventListener('click', () => {
