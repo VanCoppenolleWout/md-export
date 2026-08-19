@@ -1,5 +1,7 @@
 import html2canvas from 'html2canvas'
 import {jsPDF} from 'jspdf'
+import DOMPurify from 'dompurify'
+import {marked} from 'marked'
 
 type ExportPdfOptions = {
 	fileName: string
@@ -84,8 +86,23 @@ function extractTextBlocksFromNode(node: Element): TextBlock[] {
 	return [{type: 'paragraph', text}]
 }
 
-function extractTextBlocks(previewElement: HTMLElement): TextBlock[] {
-	return Array.from(previewElement.children).flatMap((node) => extractTextBlocksFromNode(node))
+function extractTextBlocks(exportElement: HTMLElement): TextBlock[] {
+	return Array.from(exportElement.children).flatMap((node) => extractTextBlocksFromNode(node))
+}
+
+function createExportElement(markdownSource: string): HTMLElement {
+	const parsed = marked.parse(markdownSource)
+	const html = typeof parsed === 'string' ? parsed : ''
+	const exportElement = document.createElement('article')
+	exportElement.className = 'markdown-preview'
+	exportElement.innerHTML = DOMPurify.sanitize(html, {
+		USE_PROFILES: {html: true}
+	})
+	return exportElement
+}
+
+function hasRenderableContent(element: HTMLElement): boolean {
+	return Boolean(element.textContent?.trim() || element.querySelector('img, table, hr, pre'))
 }
 
 async function waitForFonts() {
@@ -247,7 +264,7 @@ function fixHeadingDividerRendering(clone: HTMLElement) {
 	}
 }
 
-function createRenderContainer(previewElement: HTMLElement): HTMLElement {
+function createRenderContainer(exportElement: HTMLElement): HTMLElement {
 	const container = document.createElement('section')
 	container.setAttribute('aria-hidden', 'true')
 	container.style.position = 'fixed'
@@ -262,9 +279,8 @@ function createRenderContainer(previewElement: HTMLElement): HTMLElement {
 
 	// Tailwind v4 utilities resolve to oklch() colors, which html2canvas cannot
 	// parse — keep only the stylesheet class (hex colors) and inline the text
-	// color the preview gets from text-slate-800.
-	const clone = previewElement.cloneNode(true) as HTMLElement
-	clone.removeAttribute('id')
+	// color the export element gets from text-slate-800.
+	const clone = exportElement.cloneNode(true) as HTMLElement
 	clone.className = 'markdown-preview'
 	clone.style.color = '#1e293b'
 	clone.style.maxHeight = 'none'
@@ -282,9 +298,9 @@ function createRenderContainer(previewElement: HTMLElement): HTMLElement {
 	return container
 }
 
-async function renderCanvas(previewElement: HTMLElement): Promise<HTMLCanvasElement> {
+async function renderCanvas(exportElement: HTMLElement): Promise<HTMLCanvasElement> {
 	await waitForFonts()
-	const container = createRenderContainer(previewElement)
+	const container = createRenderContainer(exportElement)
 
 	try {
 		return await html2canvas(container, {
@@ -363,8 +379,8 @@ function renderPdfFromCanvas(canvas: HTMLCanvasElement): jsPDF {
 	return pdf
 }
 
-function renderPdfFromTextBlocks(previewElement: HTMLElement): jsPDF {
-	const blocks = extractTextBlocks(previewElement)
+function renderPdfFromTextBlocks(exportElement: HTMLElement): jsPDF {
+	const blocks = extractTextBlocks(exportElement)
 	if (!blocks.length) {
 		throw new Error('No preview content available for fallback PDF export.')
 	}
@@ -471,42 +487,40 @@ function renderPdfFromTextBlocks(previewElement: HTMLElement): jsPDF {
 	return pdf
 }
 
-async function renderPdfFromElement(previewElement: HTMLElement): Promise<jsPDF> {
-	if (!previewElement.textContent?.trim()) {
-		throw new Error('No preview content available for PDF export.')
+async function renderPdfFromElement(exportElement: HTMLElement): Promise<jsPDF> {
+	if (!hasRenderableContent(exportElement)) {
+		throw new Error('No Markdown content available for PDF export.')
 	}
 
-	const canvas = await renderCanvas(previewElement)
+	const canvas = await renderCanvas(exportElement)
 	return renderPdfFromCanvas(canvas)
 }
 
 async function renderPdfWithFallback(
-	previewElement: HTMLElement
+	markdownSource: string
 ): Promise<{pdf: jsPDF; mode: PdfRenderMode}> {
-	if (!previewElement.textContent?.trim()) {
-		throw new Error('No preview content available for PDF export.')
+	const exportElement = createExportElement(markdownSource)
+	if (!hasRenderableContent(exportElement)) {
+		throw new Error('No Markdown content available for PDF export.')
 	}
 
 	try {
-		const pdf = await renderPdfFromElement(previewElement)
+		const pdf = await renderPdfFromElement(exportElement)
 		return {pdf, mode: 'canvas'}
 	} catch (error) {
 		console.warn('Canvas-based PDF render failed. Falling back to text renderer.', error)
-		return {pdf: renderPdfFromTextBlocks(previewElement), mode: 'fallback'}
+		return {pdf: renderPdfFromTextBlocks(exportElement), mode: 'fallback'}
 	}
 }
 
-export async function downloadPdfFromPreview(
-	previewElement: HTMLElement,
-	options: ExportPdfOptions
-) {
-	const {pdf, mode} = await renderPdfWithFallback(previewElement)
+export async function downloadPdfFromMarkdown(markdownSource: string, options: ExportPdfOptions) {
+	const {pdf, mode} = await renderPdfWithFallback(markdownSource)
 	pdf.save(sanitizeFileName(options.fileName))
 	return mode
 }
 
-export async function printPdfFromPreview(previewElement: HTMLElement) {
-	const {pdf, mode} = await renderPdfWithFallback(previewElement)
+export async function printPdfFromMarkdown(markdownSource: string) {
+	const {pdf, mode} = await renderPdfWithFallback(markdownSource)
 	const blob = pdf.output('blob')
 	const blobUrl = URL.createObjectURL(blob)
 	const printFrame = document.createElement('iframe')

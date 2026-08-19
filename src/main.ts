@@ -2,7 +2,7 @@ import './style.css'
 import DOMPurify from 'dompurify'
 import {marked} from 'marked'
 import {setupMarkdownFilePicker} from './markdown-file-picker'
-import {downloadPdfFromPreview, printPdfFromPreview} from './pdf-export'
+import {downloadPdfFromMarkdown, printPdfFromMarkdown} from './pdf-export'
 
 marked.setOptions({
 	gfm: true,
@@ -85,6 +85,7 @@ const printButton = document.querySelector<HTMLButtonElement>('#print-pdf')!
 
 const dropzoneActiveClasses = ['border-teal-500', 'bg-teal-50/80']
 let currentFileName = 'markdown-export'
+let currentMarkdownSource = ''
 
 function setStatus(message: string, tone: 'neutral' | 'success' | 'error' = 'neutral') {
 	statusElement.textContent = message
@@ -114,6 +115,7 @@ function renderMarkdownPreview(markdownSource: string) {
 async function handleMarkdownFile(file: File) {
 	const markdownSource = await file.text()
 	renderMarkdownPreview(markdownSource)
+	currentMarkdownSource = markdownSource
 	currentFileName = file.name
 	selectedFile.textContent = file.name
 	setStatus(`Loaded ${file.name}`, 'success')
@@ -165,7 +167,7 @@ downloadButton.addEventListener('click', async () => {
 	setStatus('Generating PDF download...', 'neutral')
 
 	try {
-		const mode = await downloadPdfFromPreview(previewContent, {
+		const mode = await downloadPdfFromMarkdown(currentMarkdownSource, {
 			fileName: currentFileName
 		})
 		const message =
@@ -185,7 +187,7 @@ printButton.addEventListener('click', async () => {
 	setStatus('Preparing print PDF...', 'neutral')
 
 	try {
-		const mode = await printPdfFromPreview(previewContent)
+		const mode = await printPdfFromMarkdown(currentMarkdownSource)
 		const message =
 			mode === 'canvas' ? 'Print dialog opened.' : 'Print dialog opened (fallback renderer).'
 		setStatus(message, 'success')
