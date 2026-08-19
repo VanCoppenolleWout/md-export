@@ -190,18 +190,24 @@ function inlineListMarkers(clone: HTMLElement) {
 }
 
 // html2canvas draws the background of padded inline elements at the wrong
-// vertical offset; inline-block renders correctly. The asymmetric padding
-// compensates for html2canvas painting text a few pixels lower than the
-// browser does, recentering the background around the text.
+// vertical offset; inline-block renders correctly. The inner span lifts the
+// text a couple of pixels to counter html2canvas painting text lower than
+// the browser, keeping it centered in the background box.
 function fixInlineCodeRendering(clone: HTMLElement) {
 	for (const code of clone.querySelectorAll<HTMLElement>('code')) {
 		if (code.parentElement?.tagName.toLowerCase() === 'pre') {
 			continue
 		}
 		code.style.display = 'inline-block'
-		code.style.lineHeight = '1'
-		code.style.paddingTop = '0'
-		code.style.paddingBottom = '0.28em'
+		code.style.lineHeight = '1.25'
+
+		const inner = document.createElement('span')
+		inner.style.position = 'relative'
+		inner.style.top = '-2px'
+		while (code.firstChild) {
+			inner.appendChild(code.firstChild)
+		}
+		code.appendChild(inner)
 	}
 }
 
@@ -214,6 +220,19 @@ function fixStrikethroughRendering(clone: HTMLElement) {
 		struck.style.backgroundRepeat = 'no-repeat'
 		struck.style.backgroundSize = '100% 1px'
 		struck.style.backgroundPosition = '0 97%'
+	}
+}
+
+// Padded blocks suffer from the same lower-painted text: shift the padding
+// upward (less top, more bottom) so the content sits visually centered.
+function fixBlockPaddingRendering(clone: HTMLElement) {
+	for (const pre of clone.querySelectorAll<HTMLElement>('pre')) {
+		pre.style.paddingTop = '0.45rem'
+		pre.style.paddingBottom = '1.15rem'
+	}
+	for (const quote of clone.querySelectorAll<HTMLElement>('blockquote')) {
+		quote.style.paddingTop = '0.25rem'
+		quote.style.paddingBottom = '0.85rem'
 	}
 }
 
@@ -256,6 +275,7 @@ function createRenderContainer(previewElement: HTMLElement): HTMLElement {
 	fixInlineCodeRendering(clone)
 	fixStrikethroughRendering(clone)
 	fixHeadingDividerRendering(clone)
+	fixBlockPaddingRendering(clone)
 
 	container.appendChild(clone)
 	document.body.appendChild(container)
