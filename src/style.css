@@ -111,7 +111,7 @@
 
 .markdown-preview ul,
 .markdown-preview ol {
-	padding-left: 1.25rem;
+	padding-left: 1.75rem;
 }
 
 .markdown-preview ul ul,
@@ -146,6 +146,12 @@
 .markdown-preview li::marker {
 	color: #334155;
 	font-weight: 600;
+}
+
+.markdown-preview hr {
+	margin: 1.25rem 0;
+	border: 0;
+	border-top: 1px solid #d9e0e2;
 }
 
 .markdown-preview blockquote {
@@ -193,6 +199,29 @@
 
 .markdown-preview li:has(input[type='checkbox'])::marker {
 	content: '';
+}
+
+.markdown-preview table {
+	border-collapse: collapse;
+	margin: 0.8rem 0;
+	font-size: 0.95rem;
+}
+
+.markdown-preview th,
+.markdown-preview td {
+	border: 1px solid #d9e0e2;
+	padding: 0.4rem 0.65rem;
+	text-align: left;
+}
+
+.markdown-preview th {
+	background: #f1f5f9;
+	font-weight: 600;
+	color: #0f172a;
+}
+
+.markdown-preview tbody tr:nth-child(even) {
+	background: #f8fafc;
 }
 
 .markdown-preview code {

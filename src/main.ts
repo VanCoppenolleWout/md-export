@@ -165,10 +165,14 @@ downloadButton.addEventListener('click', async () => {
 	setStatus('Generating PDF download...', 'neutral')
 
 	try {
-		await downloadPdfFromPreview(previewContent, {
+		const mode = await downloadPdfFromPreview(previewContent, {
 			fileName: currentFileName
 		})
-		setStatus('PDF downloaded successfully.', 'success')
+		const message =
+			mode === 'canvas'
+				? 'PDF downloaded successfully.'
+				: 'PDF downloaded with fallback renderer.'
+		setStatus(message, 'success')
 	} catch {
 		setStatus('PDF download failed. Try again.', 'error')
 	} finally {
@@ -181,8 +185,10 @@ printButton.addEventListener('click', async () => {
 	setStatus('Preparing print PDF...', 'neutral')
 
 	try {
-		await printPdfFromPreview(previewContent)
-		setStatus('Print dialog opened.', 'success')
+		const mode = await printPdfFromPreview(previewContent)
+		const message =
+			mode === 'canvas' ? 'Print dialog opened.' : 'Print dialog opened (fallback renderer).'
+		setStatus(message, 'success')
 	} catch {
 		setStatus('Could not open print PDF. Try again.', 'error')
 	} finally {
