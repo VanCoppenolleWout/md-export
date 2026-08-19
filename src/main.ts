@@ -4,22 +4,6 @@ import {marked} from 'marked'
 import {setupMarkdownFilePicker} from './markdown-file-picker'
 import {downloadPdfFromPreview, printPdfFromPreview} from './pdf-export'
 
-const starterMarkdown = `# Preview Ready
-
-Drop or upload a markdown file to preview it here.
-
-## Included
-
-- Headings
-- Lists
-- **Bold** and _italic_
-
-\`\`\`ts
-const message = 'Hello markdown preview'
-console.log(message)
-\`\`\`
-`
-
 marked.setOptions({
 	gfm: true,
 	breaks: false
@@ -154,7 +138,6 @@ function deactivateDropzone() {
 	dropzone.classList.remove(...dropzoneActiveClasses)
 }
 
-renderMarkdownPreview(starterMarkdown)
 setStatus('Preview is active. Upload or drop a markdown file.', 'neutral')
 
 setupMarkdownFilePicker({
