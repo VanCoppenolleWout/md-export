@@ -2,6 +2,7 @@ import './style.css'
 import DOMPurify from 'dompurify'
 import {marked} from 'marked'
 import {setupMarkdownFilePicker} from './markdown-file-picker'
+import {downloadPdfFromPreview, printPdfFromPreview} from './pdf-export'
 
 const starterMarkdown = `# Preview Ready
 
@@ -99,6 +100,7 @@ const downloadButton = document.querySelector<HTMLButtonElement>('#download-pdf'
 const printButton = document.querySelector<HTMLButtonElement>('#print-pdf')!
 
 const dropzoneActiveClasses = ['border-teal-500', 'bg-teal-50/80']
+let currentFileName = 'markdown-export'
 
 function setStatus(message: string, tone: 'neutral' | 'success' | 'error' = 'neutral') {
 	statusElement.textContent = message
@@ -128,8 +130,20 @@ function renderMarkdownPreview(markdownSource: string) {
 async function handleMarkdownFile(file: File) {
 	const markdownSource = await file.text()
 	renderMarkdownPreview(markdownSource)
+	currentFileName = file.name
 	selectedFile.textContent = file.name
 	setStatus(`Loaded ${file.name}`, 'success')
+}
+
+function setPdfActionsBusyState(isBusy: boolean) {
+	downloadButton.disabled = isBusy
+	printButton.disabled = isBusy
+
+	const disabledClasses = ['opacity-60', 'cursor-not-allowed']
+	downloadButton.classList.toggle(disabledClasses[0], isBusy)
+	downloadButton.classList.toggle(disabledClasses[1], isBusy)
+	printButton.classList.toggle(disabledClasses[0], isBusy)
+	printButton.classList.toggle(disabledClasses[1], isBusy)
 }
 
 function activateDropzone() {
@@ -163,10 +177,32 @@ setupMarkdownFilePicker({
 	}
 })
 
-downloadButton.addEventListener('click', () => {
-	setStatus('PDF download follows in the next step.', 'neutral')
+downloadButton.addEventListener('click', async () => {
+	setPdfActionsBusyState(true)
+	setStatus('Generating PDF download...', 'neutral')
+
+	try {
+		await downloadPdfFromPreview(previewContent, {
+			fileName: currentFileName
+		})
+		setStatus('PDF downloaded successfully.', 'success')
+	} catch {
+		setStatus('PDF download failed. Try again.', 'error')
+	} finally {
+		setPdfActionsBusyState(false)
+	}
 })
 
-printButton.addEventListener('click', () => {
-	setStatus('PDF print flow follows in the next step.', 'neutral')
+printButton.addEventListener('click', async () => {
+	setPdfActionsBusyState(true)
+	setStatus('Preparing print PDF...', 'neutral')
+
+	try {
+		await printPdfFromPreview(previewContent)
+		setStatus('Print dialog opened.', 'success')
+	} catch {
+		setStatus('Could not open print PDF. Try again.', 'error')
+	} finally {
+		setPdfActionsBusyState(false)
+	}
 })
