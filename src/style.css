@@ -1,5 +1,32 @@
 @import 'tailwindcss';
 
+@font-face {
+	font-family: 'Montreal';
+	font-style: normal;
+	font-weight: 500;
+	src:
+		local('Montreal Regular'),
+		url('/fonts/montreal-serial/Montreal-DemiBold.otf') format('opentype');
+}
+
+@font-face {
+	font-family: 'Montreal';
+	font-style: normal;
+	font-weight: 300;
+	src:
+		local('Montreal Light'),
+		url('/fonts/montreal-serial/Montreal-Light.otf') format('opentype');
+}
+
+@font-face {
+	font-family: 'Montreal';
+	font-style: normal;
+	font-weight: 700;
+	src:
+		local('Montreal Bold'),
+		url('/fonts/montreal-serial/Montreal-DemiBold.otf') format('opentype');
+}
+
 @layer base {
 	:root {
 		font-family: 'Space Grotesk', 'Avenir Next', 'Segoe UI', sans-serif;
@@ -7,6 +34,8 @@
 		text-rendering: optimizeLegibility;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		--font-montreal: 'Montreal', Arial, Helvetica, sans-serif;
+		--markdown-pdf-font-family: var(--font-montreal);
 	}
 
 	body {
